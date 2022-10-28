@@ -1,0 +1,46 @@
+---
+name: Build & Push
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-push-gcr:
+    name: Build and Push to GCP
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: ${{ github.ACTOR }}
+      CONNECTOR_NAME: devfest-kutaisi
+      REPO_NAME: devfest-kutaisi
+      REGION: us-central1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Calculate Commit Hash
+        id: commit
+        uses: pr-mpt/actions-commit-hash@v1
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.SERVICE_ACCOUNT_KEY }}"
+
+      - name: Build Docker Image
+        run: docker build -t $PROJECT_NAME:latest .
+
+      - name: Configure Docker Client
+        run: |-
+          gcloud auth configure-docker --quiet
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Push Docker Image to Artifact Registry
+        env:
+          TAG: ${{ steps.commit.outputs.short }}
+          IMAGE: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.PROJECT_NAME }}
+        run: |-
+          docker tag ${{ env.PROJECT_NAME }}:latest ${{ env.IMAGE }}:latest
+          docker tag ${{ env.PROJECT_NAME }}:latest ${{ env.IMAGE }}:${{ env.TAG }}
+          docker push ${{ env.IMAGE }}:latest
+          docker push ${{ env.IMAGE }}:${{ env.TAG }}
