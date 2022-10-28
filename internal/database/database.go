@@ -8,10 +8,11 @@ import (
 )
 
 type Database struct {
-	client *redis.Client
+	client     *redis.Client
+	collection string
 }
 
-func New(address, password string) (*Database, error) {
+func New(address, password, collection string) (*Database, error) {
 	ctx := context.Background()
 
 	client := redis.NewClient(&redis.Options{
@@ -25,7 +26,8 @@ func New(address, password string) (*Database, error) {
 	}
 
 	return &Database{
-		client: client,
+		client:     client,
+		collection: collection,
 	}, nil
 }
 

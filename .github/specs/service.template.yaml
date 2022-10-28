@@ -1,0 +1,31 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE}
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "1"
+        autoscaling.knative.dev/minScale: "1"
+        run.googleapis.com/vpc-access-connector: ${CONNECTOR}
+    spec:
+      containers:
+        - image: ${IMAGE}
+          ports:
+            - containerPort: 8080
+              name: http1
+          env:
+            - name: DB_COLLECTION
+              value: ${DB_COLLECTION}
+            - name: DB_ADDRESS
+              value: ${DB_ADDRESS}
+            - name: API_ADDRESS
+              value: ${API_ADDRESS}
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi

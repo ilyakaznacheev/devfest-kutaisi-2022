@@ -15,11 +15,12 @@ import (
 func main() {
 	log.Println("starting application")
 
+	dbCollection := os.Getenv("DB_COLLECTION")
 	dbAddress := os.Getenv("DB_ADDRESS")
 	apiAddress := os.Getenv("API_ADDRESS")
 
 	log.Printf("connecting to database at %q", dbAddress)
-	db, err := database.New(dbAddress, "")
+	db, err := database.New(dbAddress, "", dbCollection)
 	if err != nil {
 		log.Fatalf("connecting to database: %v", err)
 	}

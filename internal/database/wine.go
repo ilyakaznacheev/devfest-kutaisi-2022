@@ -6,19 +6,17 @@ import (
 	"github.com/ilyakaznacheev/devfest-kutaisi-2022/internal/model"
 )
 
-const wineSetName = "wine"
-
 func (db *Database) AddWine(ctx context.Context, id string, w model.Wine) error {
 	data, err := db.marshal(&w)
 	if err != nil {
 		return err
 	}
 
-	return db.client.HSet(ctx, wineSetName, id, data).Err()
+	return db.client.HSet(ctx, db.collection, id, data).Err()
 }
 
 func (db *Database) GetWine(ctx context.Context, id string) (*model.Wine, error) {
-	data, err := db.client.HGet(ctx, wineSetName, id).Result()
+	data, err := db.client.HGet(ctx, db.collection, id).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +27,7 @@ func (db *Database) GetWine(ctx context.Context, id string) (*model.Wine, error)
 }
 
 func (db *Database) GetWineList(ctx context.Context) (map[string]model.Wine, error) {
-	data, err := db.client.HGetAll(ctx, wineSetName).Result()
+	data, err := db.client.HGetAll(ctx, db.collection).Result()
 	if err != nil {
 		return nil, err
 	}

@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_NAME: ${{ github.ACTOR }}
-      CONNECTOR_NAME: devfest-kutaisi
+      CONNECTOR_NAME: devfest-kutaisi-alpha
       REPO_NAME: devfest-kutaisi
       REGION: us-central1
 
@@ -44,3 +44,19 @@ jobs:
           docker tag ${{ env.PROJECT_NAME }}:latest ${{ env.IMAGE }}:${{ env.TAG }}
           docker push ${{ env.IMAGE }}:latest
           docker push ${{ env.IMAGE }}:${{ env.TAG }}
+
+      - name: Create Service declearation
+        run: |-
+          export IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.PROJECT_NAME }}:latest"
+          export SERVICE="${{ env.PROJECT_NAME }}"
+          export DB_COLLECTION="${{ env.PROJECT_NAME }}"
+          export DB_ADDRESS="${{ secrets.DB_ADDRESS }}"
+          export API_ADDRESS="${{ secrets.API_ADDRESS }}"
+          export CONNECTOR="projects/${{ secrets.PROJECT_ID }}/locations/${{ env.REGION }}/connectors/${{ env.CONNECTOR_NAME }}"
+          envsubst < ./.github/specs/service.template.yaml > service.yaml
+
+      - name: Deploy to Cloud Run
+        id: "deploy"
+        uses: "google-github-actions/deploy-cloudrun@v0"
+        with:
+          metadata: service.yaml
