@@ -5,12 +5,12 @@ on:
     branches: [main]
 
 jobs:
-  build-push-gcr:
+  build-push-gcp:
     name: Build and Push to GCP
     runs-on: ubuntu-latest
     env:
       PROJECT_NAME: ${{ github.ACTOR }}
-      CONNECTOR_NAME: devfest-kutaisi-alpha
+      CONNECTOR_NAME: devfest-kutaisi
       REPO_NAME: devfest-kutaisi
       REGION: us-central1
 
@@ -23,6 +23,7 @@ jobs:
         uses: pr-mpt/actions-commit-hash@v1
 
       - id: "auth"
+        name: Authenticate GCP client
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: "${{ secrets.SERVICE_ACCOUNT_KEY }}"
@@ -45,6 +46,27 @@ jobs:
           docker push ${{ env.IMAGE }}:latest
           docker push ${{ env.IMAGE }}:${{ env.TAG }}
 
+  deploy-cloud-run:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    needs: build-push-gcp
+    env:
+      PROJECT_NAME: ${{ github.ACTOR }}
+      CONNECTOR_NAME: devfest-kutaisi-alpha
+      REPO_NAME: devfest-kutaisi
+      REGION: us-central1
+      DEPLOY_ENABLED: ${{ secrets.DEPLOY_ENABLED }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - id: "auth"
+        name: Authenticate GCP client
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.SERVICE_ACCOUNT_KEY }}"
+
       - name: Create Service declearation
         run: |-
           export IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.PROJECT_NAME }}:latest"
@@ -58,5 +80,6 @@ jobs:
       - name: Deploy to Cloud Run
         id: "deploy"
         uses: "google-github-actions/deploy-cloudrun@v0"
+        if: ${{ env.DEPLOY_ENABLED == 'true' }}
         with:
           metadata: service.yaml
