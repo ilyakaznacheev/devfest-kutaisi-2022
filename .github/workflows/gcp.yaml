@@ -52,7 +52,7 @@ jobs:
     needs: build-push-gcp
     env:
       PROJECT_NAME: ${{ github.ACTOR }}
-      CONNECTOR_NAME: devfest-kutaisi-alpha
+      CONNECTOR_NAME: devfest-kutaisi
       REPO_NAME: devfest-kutaisi
       REGION: us-central1
       DEPLOY_ENABLED: ${{ secrets.DEPLOY_ENABLED }}
