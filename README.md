@@ -121,15 +121,15 @@ For this step, we have job `build-push-gcp` in our pipeline. Commit changes and 
 
 ### Create a Cloud Run application
 
-Go to GCP [Cloud Run](https://console.cloud.google.com/run) and create a new service. In "Deploy one revision from an existing container image" chose _Artifact Registry_ > _.../devfest-kutaisi_ > _<your GitHub username>_ > latest.
+Go to GCP [Cloud Run](https://console.cloud.google.com/run) and create a new service. In "Deploy one revision from an existing container image" chose _Artifact Registry_ > _.../devfest-kutaisi_ > _ **your GitHub username**_ > latest.
 
 Set autoscaling minimum and maximum to 1. Select "Allow unauthenticated invocations" under "Authentication".
 
 Go to _Container, Connections, Security_ > _Container_ and add the following environment variables:
 
 - API_ADDRESS - 0.0.0.0:8080
-- DB_ADDRESS - <address of Memorystore instance>
-- DB_COLLECTION - <your GiHhub account name>
+- DB_ADDRESS - **address of Memorystore instance**
+- DB_COLLECTION - **your GitHub account name**
 
 Go to _Container, Connections, Security_ > _Connections_ and choose `devfest-kutaisi` as a Network connector.
 
